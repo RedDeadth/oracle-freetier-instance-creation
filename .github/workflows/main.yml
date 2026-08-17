@@ -18,45 +18,48 @@ jobs:
       - name: Install dependencies
         run: pip install -r requirements.txt
 
-      - name: Create OCI config
+      - name: Create key files
         env:
           OCI_PRIVATE_KEY: ${{ secrets.OCI_PRIVATE_KEY }}
+          OCI_SSH_PUBLIC_KEY: ${{ secrets.OCI_SSH_PUBLIC_KEY }}
+        run: |
+          echo "$OCI_PRIVATE_KEY" > oci_api_private_key.pem
+          chmod 600 oci_api_private_key.pem
+          echo "$OCI_SSH_PUBLIC_KEY" > ssh_public_key.pub
+
+      - name: Create sample_oci_config
+        env:
           OCI_USER: ${{ secrets.OCI_USER }}
           OCI_FINGERPRINT: ${{ secrets.OCI_FINGERPRINT }}
           OCI_TENANCY: ${{ secrets.OCI_TENANCY }}
           OCI_REGION: ${{ secrets.OCI_REGION }}
         run: |
-          echo "$OCI_PRIVATE_KEY" > oci_api_private_key.pem
-          chmod 600 oci_api_private_key.pem
-          mkdir -p ~/.oci
           {
             echo "[DEFAULT]"
             echo "user=$OCI_USER"
             echo "fingerprint=$OCI_FINGERPRINT"
             echo "tenancy=$OCI_TENANCY"
             echo "region=$OCI_REGION"
-            echo "key_file=/home/runner/work/oracle-freetier-instance-creation/oracle-freetier-instance-creation/oci_api_private_key.pem"
-          } > ~/.oci/config
-          cat ~/.oci/config
+            echo "key_file=oci_api_private_key.pem"
+          } > sample_oci_config
 
       - name: Create oci.env
         env:
-          OCI_TENANCY: ${{ secrets.OCI_TENANCY }}
           OCI_IMAGE_ID: ${{ secrets.OCI_IMAGE_ID }}
           OCI_SUBNET_ID: ${{ secrets.OCI_SUBNET_ID }}
-          OCI_SSH_PUBLIC_KEY: ${{ secrets.OCI_SSH_PUBLIC_KEY }}
         run: |
           {
-            echo "OCI_COMPARTMENT_ID=$OCI_TENANCY"
-            echo "OCI_IMAGE_ID=$OCI_IMAGE_ID"
+            echo "OCI_CONFIG=sample_oci_config"
+            echo "OCT_FREE_AD=AD-1"
+            echo "DISPLAY_NAME=minecraft-server"
+            echo "OCI_COMPUTE_SHAPE=VM.Standard.A1.Flex"
             echo "OCI_SUBNET_ID=$OCI_SUBNET_ID"
-            echo "OCI_SSH_PUBLIC_KEY=$OCI_SSH_PUBLIC_KEY"
-            echo "OCI_INSTANCE_SHAPE=VM.Standard.A1.Flex"
-            echo "OCI_OCPUS=2"
-            echo "OCI_MEMORY_IN_GBS=12"
-            echo "OCI_AVAILABILITY_DOMAIN=SA-SANTIAGO-1-AD-1"
-            echo "OCI_INSTANCE_DISPLAY_NAME=minecraft-server"
-            echo "OCI_ASSIGN_PUBLIC_IP=true"
+            echo "OCI_IMAGE_ID=$OCI_IMAGE_ID"
+            echo "SSH_AUTHORIZED_KEYS_FILE=ssh_public_key.pub"
+            echo "ASSIGN_PUBLIC_IP=true"
+            echo "REQUEST_WAIT_TIME_SECS=60"
+            echo "NOTIFY_EMAIL=False"
+            echo "SECOND_MICRO_INSTANCE=False"
           } > oci.env
 
       - name: Run instance creator
