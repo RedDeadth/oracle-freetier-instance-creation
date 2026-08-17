@@ -20,12 +20,17 @@ jobs:
 
       - name: Create OCI config
         run: |
+          echo "${{ secrets.OCI_PRIVATE_KEY }}" > oci_api_private_key.pem
+          chmod 600 oci_api_private_key.pem
           mkdir -p ~/.oci
-          echo "${{ secrets.OCI_PRIVATE_KEY }}" > ~/.oci/oci_api_private_key.pem
-          chmod 600 ~/.oci/oci_api_private_key.pem
-          echo "${{ secrets.OCI_CONFIG }}" > ~/.oci/config
-          sed -i 's|<path to your private keyfile>|/home/runner/.oci/oci_api_private_key.pem|g' ~/.oci/config
-
+          cat > ~/.oci/config << EOF
+          [DEFAULT]
+          user=${{ secrets.OCI_USER }}
+          fingerprint=${{ secrets.OCI_FINGERPRINT }}
+          tenancy=${{ secrets.OCI_TENANCY }}
+          region=${{ secrets.OCI_REGION }}
+          key_file=/home/runner/work/oracle-freetier-instance-creation/oracle-freetier-instance-creation/oci_api_private_key.pem
+          EOF
       - name: Create oci.env
         run: |
           cat > oci.env << EOF
