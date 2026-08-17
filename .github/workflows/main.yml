@@ -38,7 +38,7 @@ jobs:
             echo "key_file=/home/runner/work/oracle-freetier-instance-creation/oracle-freetier-instance-creation/oci_api_private_key.pem"
           } > ~/.oci/config
           cat ~/.oci/config
-          
+
       - name: Create oci.env
         env:
           OCI_TENANCY: ${{ secrets.OCI_TENANCY }}
@@ -46,7 +46,18 @@ jobs:
           OCI_SUBNET_ID: ${{ secrets.OCI_SUBNET_ID }}
           OCI_SSH_PUBLIC_KEY: ${{ secrets.OCI_SSH_PUBLIC_KEY }}
         run: |
-          printf "OCI_COMPARTMENT_ID=%s\nOCI_IMAGE_ID=%s\nOCI_SUBNET_ID=%s\nOCI_SSH_PUBLIC_KEY=%s\nOCI_INSTANCE_SHAPE=VM.Standard.A1.Flex\nOCI_OCPUS=2\nOCI_MEMORY_IN_GBS=12\nOCI_AVAILABILITY_DOMAIN=SA-SANTIAGO-1-AD-1\nOCI_INSTANCE_DISPLAY_NAME=minecraft-server\nOCI_ASSIGN_PUBLIC_IP=true\n" "$OCI_TENANCY" "$OCI_IMAGE_ID" "$OCI_SUBNET_ID" "$OCI_SSH_PUBLIC_KEY" > oci.env
+          {
+            echo "OCI_COMPARTMENT_ID=$OCI_TENANCY"
+            echo "OCI_IMAGE_ID=$OCI_IMAGE_ID"
+            echo "OCI_SUBNET_ID=$OCI_SUBNET_ID"
+            echo "OCI_SSH_PUBLIC_KEY=$OCI_SSH_PUBLIC_KEY"
+            echo "OCI_INSTANCE_SHAPE=VM.Standard.A1.Flex"
+            echo "OCI_OCPUS=2"
+            echo "OCI_MEMORY_IN_GBS=12"
+            echo "OCI_AVAILABILITY_DOMAIN=SA-SANTIAGO-1-AD-1"
+            echo "OCI_INSTANCE_DISPLAY_NAME=minecraft-server"
+            echo "OCI_ASSIGN_PUBLIC_IP=true"
+          } > oci.env
 
       - name: Run instance creator
         run: python main.py
