@@ -29,8 +29,16 @@ jobs:
           echo "$OCI_PRIVATE_KEY" > oci_api_private_key.pem
           chmod 600 oci_api_private_key.pem
           mkdir -p ~/.oci
-          printf "[DEFAULT]\nuser=%s\nfingerprint=%s\ntenancy=%s\nregion=%s\nkey_file=/home/runner/work/oracle-freetier-instance-creation/oracle-freetier-instance-creation/oci_api_private_key.pem\n" "$OCI_USER" "$OCI_FINGERPRINT" "$OCI_TENANCY" "$OCI_REGION" > ~/.oci/config
-
+          {
+            echo "[DEFAULT]"
+            echo "user=$OCI_USER"
+            echo "fingerprint=$OCI_FINGERPRINT"
+            echo "tenancy=$OCI_TENANCY"
+            echo "region=$OCI_REGION"
+            echo "key_file=/home/runner/work/oracle-freetier-instance-creation/oracle-freetier-instance-creation/oci_api_private_key.pem"
+          } > ~/.oci/config
+          cat ~/.oci/config
+          
       - name: Create oci.env
         env:
           OCI_TENANCY: ${{ secrets.OCI_TENANCY }}
