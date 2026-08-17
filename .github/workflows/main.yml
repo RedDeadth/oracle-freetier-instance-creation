@@ -1,0 +1,45 @@
+name: Oracle Instance Creator
+on:
+  schedule:
+    - cron: '*/5 * * * *'
+  workflow_dispatch:
+
+jobs:
+  create-instance:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Create OCI config
+        run: |
+          mkdir -p ~/.oci
+          echo "${{ secrets.OCI_PRIVATE_KEY }}" > ~/.oci/oci_api_private_key.pem
+          chmod 600 ~/.oci/oci_api_private_key.pem
+          echo "${{ secrets.OCI_CONFIG }}" > ~/.oci/config
+          sed -i 's|<path to your private keyfile>|/home/runner/.oci/oci_api_private_key.pem|g' ~/.oci/config
+
+      - name: Create oci.env
+        run: |
+          cat > oci.env << EOF
+          OCI_COMPARTMENT_ID=${{ secrets.OCI_TENANCY }}
+          OCI_IMAGE_ID=${{ secrets.OCI_IMAGE_ID }}
+          OCI_SUBNET_ID=${{ secrets.OCI_SUBNET_ID }}
+          OCI_SSH_PUBLIC_KEY=${{ secrets.OCI_SSH_PUBLIC_KEY }}
+          OCI_INSTANCE_SHAPE=VM.Standard.A1.Flex
+          OCI_OCPUS=2
+          OCI_MEMORY_IN_GBS=12
+          OCI_AVAILABILITY_DOMAIN=SA-SANTIAGO-1-AD-1
+          OCI_INSTANCE_DISPLAY_NAME=minecraft-server
+          OCI_ASSIGN_PUBLIC_IP=true
+          EOF
+
+      - name: Run instance creator
+        run: python main.py
