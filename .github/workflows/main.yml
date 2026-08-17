@@ -8,10 +8,10 @@ jobs:
   create-instance:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: '3.10'
 
@@ -23,17 +23,18 @@ jobs:
           echo "${{ secrets.OCI_PRIVATE_KEY }}" > oci_api_private_key.pem
           chmod 600 oci_api_private_key.pem
           mkdir -p ~/.oci
-          cat > ~/.oci/config << EOF
+          cat > ~/.oci/config << 'OCIEOF'
           [DEFAULT]
           user=${{ secrets.OCI_USER }}
           fingerprint=${{ secrets.OCI_FINGERPRINT }}
           tenancy=${{ secrets.OCI_TENANCY }}
           region=${{ secrets.OCI_REGION }}
           key_file=/home/runner/work/oracle-freetier-instance-creation/oracle-freetier-instance-creation/oci_api_private_key.pem
-          EOF
+          OCIEOF
+
       - name: Create oci.env
         run: |
-          cat > oci.env << EOF
+          cat > oci.env << 'EOF'
           OCI_COMPARTMENT_ID=${{ secrets.OCI_TENANCY }}
           OCI_IMAGE_ID=${{ secrets.OCI_IMAGE_ID }}
           OCI_SUBNET_ID=${{ secrets.OCI_SUBNET_ID }}
