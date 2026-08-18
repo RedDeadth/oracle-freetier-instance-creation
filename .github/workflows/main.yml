@@ -61,6 +61,7 @@ jobs:
             echo "NOTIFY_EMAIL=False"
             echo "SECOND_MICRO_INSTANCE=False"
           } > oci.env
+          cat oci.env
 
       - name: Run instance creator
         run: python main.py
