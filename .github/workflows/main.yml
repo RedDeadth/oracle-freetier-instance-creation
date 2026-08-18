@@ -21,11 +21,9 @@ jobs:
       - name: Create key files
         env:
           OCI_PRIVATE_KEY: ${{ secrets.OCI_PRIVATE_KEY }}
-          OCI_SSH_PUBLIC_KEY: ${{ secrets.OCI_SSH_PUBLIC_KEY }}
         run: |
           echo "$OCI_PRIVATE_KEY" > oci_api_private_key.pem
           chmod 600 oci_api_private_key.pem
-          echo "$OCI_SSH_PUBLIC_KEY" > ssh_public_key.pub
 
       - name: Create sample_oci_config
         env:
@@ -61,7 +59,6 @@ jobs:
             echo "NOTIFY_EMAIL=False"
             echo "SECOND_MICRO_INSTANCE=False"
           } > oci.env
-          cat oci.env
 
       - name: Run instance creator
         run: python main.py
